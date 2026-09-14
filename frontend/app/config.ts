@@ -1,0 +1,4 @@
+export const CHANGE_PROOF_CONTRACT =
+  "0x881Ee14F5e9BD74e666225b48eA87D934c40d89C";
+
+export const CHANGE_PROOF_NETWORK = "testnet-bradbury";

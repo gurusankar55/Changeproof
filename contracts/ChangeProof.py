@@ -59,8 +59,9 @@ class ChangeProof(gl.Contract):
 
     @gl.public.write
     def capture_snapshot(self) -> None:
+        source_url = self.source_url
         def fetch_current():
-            response = gl.nondet.web.get(self.source_url)
+            response = gl.nondet.web.get(source_url)
             body = response.body
 
             if response.status != 200:
