@@ -62,14 +62,16 @@ const [registering, setRegistering] = useState(false);
 const [registerMessage, setRegisterMessage] = useState("");
 const [capturing, setCapturing] = useState(false);
 const [captureMessage, setCaptureMessage] = useState("");
+const [onChainStatus, setOnChainStatus] = useState("NOT_CHECKED");
 const loadOnChainStatus = async () => {
   try {
     const status = await genlayerClient.readContract({
-  address: "0x881Ee14F5e9BD74e666225b48eA87D934c40d89C",
+  address: "0x53324D803616cbF2E99f3D75E8Fa01242401c62e",
   functionName: "get_status",
   args: [],
 });
 
+setOnChainStatus(String(status));
 console.log("ChangeProof on-chain status:", status);
   } catch (error) {
     console.error("Failed to read ChangeProof status:", error);
@@ -97,7 +99,7 @@ const registerSource = async () => {
     const client = await createWalletClient(walletAddress, walletProvider);
 
     const hash = await client.writeContract({
-  address: "0x881Ee14F5e9BD74e666225b48eA87D934c40d89C",
+  address: "0x53324D803616cbF2E99f3D75E8Fa01242401c62e",
   functionName: "register_source",
   args: [sourceName.trim(), url.trim()],
   value: BigInt(0),
@@ -139,7 +141,7 @@ const captureSnapshot = async () => {
     const client = await createWalletClient(walletAddress, walletProvider);
 
     const hash = await client.writeContract({
-      address: "0x881Ee14F5e9BD74e666225b48eA87D934c40d89C",
+      address: "0x53324D803616cbF2E99f3D75E8Fa01242401c62e",
       functionName: "capture_snapshot",
       args: [],
       value: BigInt(0),
@@ -352,7 +354,11 @@ const openWalletSelector = async () => {
             {statuses.map((status) => (
               <div
                 key={status.value}
-                className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5"
+                className={`rounded-2xl border p-5 ${
+  onChainStatus === status.value
+    ? "border-white bg-white/10"
+    : "border-zinc-800 bg-zinc-900/50"
+}`}
               >
                 <div className="mb-3 h-2 w-2 rounded-full bg-white" />
 
@@ -382,7 +388,7 @@ const openWalletSelector = async () => {
               Last verification
             </p>
 
-            <p className="mt-3 text-sm text-zinc-500">Not checked yet</p>
+            <p className="mt-3 text-sm text-zinc-500">{onChainStatus}</p>
           </div>
 
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
@@ -391,8 +397,8 @@ const openWalletSelector = async () => {
             </p>
 
             <p className="mt-3 text-sm text-zinc-500">
-              {selectedWallet ? "Wallet selected" : "Awaiting connection"}
-            </p>
+  {onChainStatus}
+</p>
           </div>
         </section>
 
