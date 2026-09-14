@@ -65,7 +65,42 @@ export async function connectWallet(
   address: string;
   provider: WalletProvider;
 }> {
-  const accounts = (await wallet.provider.request({
+  const provider = wallet.provider;
+  const targetChainId = "0x107d";
+
+  try {
+    await provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: targetChainId }],
+    });
+  } catch (error: unknown) {
+    const switchError = error as { code?: number };
+
+    if (switchError.code === 4902) {
+      await provider.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: targetChainId,
+            chainName: "GenLayer Bradbury Testnet",
+            nativeCurrency: {
+              name: "GEN",
+              symbol: "GEN",
+              decimals: 18,
+            },
+            rpcUrls: ["https://rpc-bradbury.genlayer.com"],
+            blockExplorerUrls: [
+              "https://explorer-bradbury.genlayer.com/",
+            ],
+          },
+        ],
+      });
+    } else {
+      throw error;
+    }
+  }
+
+  const accounts = (await provider.request({
     method: "eth_requestAccounts",
   })) as string[];
 
@@ -75,6 +110,6 @@ export async function connectWallet(
 
   return {
     address: accounts[0],
-    provider: wallet.provider,
+    provider,
   };
 }
