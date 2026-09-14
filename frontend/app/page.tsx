@@ -5,6 +5,11 @@ import { connectWallet, discoverWallets } from "./lib/wallet";
 import { createWalletClient, genlayerClient } from "./lib/genlayer";
 const statuses = [
   {
+    label: "Snapshot Captured",
+    value: "SNAPSHOT_CAPTURED",
+    description: "Initial source snapshot is stored on-chain.",
+  },
+  {
     label: "No Change",
     value: "NO_CHANGE",
     description: "Source content is unchanged.",
@@ -72,6 +77,10 @@ const loadOnChainStatus = async () => {
 });
 
 setOnChainStatus(String(status));
+    const name = await genlayerClient.readContract({ address: "0x53324D803616cbF2E99f3D75E8Fa01242401c62e", functionName: "get_source_name", args: [] });
+    const source = await genlayerClient.readContract({ address: "0x53324D803616cbF2E99f3D75E8Fa01242401c62e", functionName: "get_source", args: [] });
+    setSourceName(String(name));
+    setUrl(String(source));
 console.log("ChangeProof on-chain status:", status);
   } catch (error) {
     console.error("Failed to read ChangeProof status:", error);
@@ -109,13 +118,13 @@ setRegisterMessage("Transaction submitted. Waiting for confirmation...");
 
 const receipt = await client.waitForTransactionReceipt({
   hash,
-  interval: 2000,
   retries: 180,
 });
 
 setRegisterMessage(
   `Registration confirmed: ${receipt.status ?? "confirmed"}`
 );
+    await loadOnChainStatus();
   } catch (error) {
     console.error("ChangeProof registration error:", error);
 
@@ -321,11 +330,19 @@ const openWalletSelector = async () => {
           </div>
 
           <button
-  onClick={captureSnapshot}
-  disabled={capturing || !walletAddress}
-  className="mt-3 w-full rounded-xl border border-zinc-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:mt-0 sm:w-auto"
+  onClick={registerSource}
+  disabled={!walletAddress}
+  className="mt-3 w-full rounded-xl border border-zinc-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-50"
 >
-  {capturing ? "Capturing..." : "Capture Snapshot"}
+  Register Source
+</button>
+
+<button
+  onClick={captureSnapshot}
+  disabled={!walletAddress || capturing}
+  className="mt-3 w-full rounded-xl bg-white px-5 py-3 text-sm font-bold text-zinc-950 transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  {capturing ? "Capturing Snapshot..." : "Capture Snapshot"}
 </button>
 
 {captureMessage && (
