@@ -60,12 +60,14 @@ class ChangeProof(gl.Contract):
     @gl.public.write
     def capture_snapshot(self) -> None:
         source_url = self.source_url
+
         def fetch_current():
             response = gl.nondet.web.get(source_url)
-            body = response.body
 
-            if response.status != 200:
+            if response.status < 200 or response.status >= 300:
                 return "__SOURCE_UNAVAILABLE__"
+
+            body = response.body
 
             if isinstance(body, bytes):
                 body = body.decode("utf-8")
@@ -88,5 +90,4 @@ class ChangeProof(gl.Contract):
                 current_snapshot
             )
             self.last_snapshot = current_snapshot
-
    
