@@ -1,0 +1,5 @@
+   Demo API Pricing
+   Plan: Basic
+   Price: 10 USD per month
+   Rate limit: 100 requests per minute
+   Free trial: 14 days
